@@ -1,0 +1,127 @@
+#! /usr/bin/env bash
+
+readonly url=https://raw.githubusercontent.com/KineticCafe/aws-cli-session-manager/main/aws-cli-session-manager
+declare script
+script="$(basename "${url}")"
+readonly script
+
+readonly -a symlinked_commands=(aws aws_completer)
+
+# cross-platform equivalent to GNU readlink -f.
+canonicalize() {
+  local t
+  t="$1"
+
+  cd "$(dirname "${t}")" || return 1
+  t="$(basename "${t}")"
+
+  while [[ -L "${t}" ]]; do
+    t="$(readlink "${t}")"
+    cd "$(dirname "${t}")" || return 1
+    t="$(basename "${t}")"
+  done
+
+  echo "$(pwd -P)/${t}"
+}
+
+usage() {
+  cat <<USAGE
+usage: $(basename "$0") [--no-symlinks|-S] [--force|-f] [--verbose|-v] TARGET
+       $(basename "$0") --help | -h | -?
+
+Installs the ${script} script to TARGET. Installation will be skipped
+if the TARGET/${script} already exists and --force is not supplied.
+
+Unless --no-symlinks is provided, it will also attempt to install symlinks for
+AWS CLI commands:
+
+  aws                  aws_completer
+
+Symlink installation will be skipped if the file already exists and is not
+already a symlink to TARGET/${script} and --force is not supplied.
+USAGE
+}
+
+maybe-verbose() {
+  if "${verbose}"; then
+    set -x && "${@}" && set +x
+  else
+    "${@}"
+  fi
+}
+
+declare force install_symlinks no_download target target_script verbose
+force=false
+install_symlinks=true
+no_download=false
+verbose=false
+
+while (($#)); do
+  case "$1" in
+  --force | -f) force=true ;;
+  --verbose | -v) verbose=true ;;
+  --no-download) no_download=true ;;
+  --no-symlinks | -S) install_symlinks=false ;;
+  --help | -h | -?)
+    usage
+    exit 0
+    ;;
+  *)
+    if [[ ! -d "$1" ]]; then
+      echo >&2 "error: '$1' is not a directory"
+      usage >&2
+      exit 1
+    fi
+
+    if [[ -n "${target}" ]]; then
+      echo >&2 "warning: target '$target' is being replaced with '$1'"
+    fi
+
+    target="$1"
+    ;;
+  esac
+
+  shift
+done
+
+target_script="${target}/${script}"
+
+download-script() {
+  if ! curl -sSL "${url}" -o "${target_script}"; then
+    echo >&2 "error: could not download ${url} into ${target_script}."
+    exit 1
+  fi
+}
+
+if "${no_download}"; then
+  if ! [[ -x "${target_script}" ]]; then
+    echo >&2 "error: ${target_script} does not exist and no download is set."
+  fi
+elif [[ -x "${target_script}" ]]; then
+  if ! "${force}"; then
+    echo >&2 "error: ${target_script} already exists."
+    exit 1
+  fi
+
+  maybe-verbose download-script
+
+  [[ -x "${target_script}" ]] || maybe-verbose chmod +x "${target_script}"
+fi
+
+"${install_symlinks}" || exit 0
+
+declare symlinked_command target_command canonical_target
+
+for symlinked_command in "${symlinked_commands[@]}"; do
+  target_command="${target}/${symlinked_command}"
+
+  if [[ -f "${target_command}" ]]; then
+    canonical_target="$(canonicalize "${target_command}")"
+
+    if [[ "${canonical_target}" != "${target_script}" ]]; then
+      "${force}" || continue
+    fi
+  fi
+
+  maybe-verbose ln -sf "${target_script}" "${target_command}"
+done
