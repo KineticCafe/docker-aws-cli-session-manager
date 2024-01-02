@@ -36,6 +36,13 @@ jobs:
         with:
           ref: refs/tags/${{ github.event.inputs.tag }}
 
+      - run: |
+          echo REPOSITORY="$(
+            echo "${GITHUB_REPOSITORY}" |
+              tr '[:upper:]' '[:lower:]' |
+              sed 's/docker-//'
+          )" >"${GITHUB_ENV}"
+
       - uses: docker/login-action@v3.0.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -51,8 +58,8 @@ jobs:
         uses: docker/metadata-action@v5.4.0
         with:
           images: |
-            kineticcafe/aws-cli-session-manager
-            ghcr.io/${{ github.repository }}
+            ${{ env.REPOSITORY }}
+            ghcr.io/${{ env.REPOSITORY }}
           # generate Docker tags based on the following events/attributes
           tags: |
             type=semver,pattern={{version}}
@@ -75,7 +82,7 @@ jobs:
 
       - uses: peter-evans/dockerhub-description@v3.4.2
         with:
-          repository: kineticcafe/sqitch-pgtap
+          repository: kineticcafe/aws-cli-session-manager
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
