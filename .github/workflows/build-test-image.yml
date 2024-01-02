@@ -1,0 +1,35 @@
+name: Build Test Image
+
+on:
+  pull_request:
+    branches:
+      - main
+  merge_group:
+    types:
+      - checks_requested
+
+jobs:
+  build:
+    name: Build Test Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3.0.0
+
+      - run: |
+          echo REPOSITORY="$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')" >"${GITHUB_ENV}"
+
+      - id: docker_build
+        uses: docker/build-push-action@v5.1.0
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ${{ github.repository }}:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - run: ./aws-cli-session-manager --version
+        env:
+          IMAGE: ${{ github.repository }}:test

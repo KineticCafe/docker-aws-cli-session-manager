@@ -1,0 +1,46 @@
+name: Check for aws-cli update
+
+on:
+  schedule:
+    - cron: '0 13 * * 2' # 13:00 UTC every Tuesday
+  workflow_dispatch:
+
+env:
+  AWS_CLI_VERSION: '2.15.6'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      needs-update: '{{ $steps.check.outputs.needs-updating }}'
+    steps:
+      - uses: lucacome/docker-image-update-checker@v1.2.1
+        id: check
+        with:
+          base-image: amazon/aws-cli:${{ env.AWS_CLI_VERSION }}
+          image: kineticcafe/aws-cli-session-manager:latest
+          platforms: linux/amd64,linux/arm64
+
+  pr:
+    needs: check
+    if: needs.check.outputs.needs-update == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: extractions/setup-just@v1
+      - run: |
+          just update-base-image
+      - uses: peter-evans/create-pull-request@v5.0.2
+        with:
+          commit-message: ${{ env.UPDATE_TITLE }}
+
+            ${{ env.UPDATE_BODY }}
+          branch: update-base-image/${{ env.UPDATE_VERSION }}
+          title: ${{ env.UPDATE_TITLE }}
+          body: ${{ env.UPDATE_BODY }}
+          labels: |
+            automated
+          assignees: |
+            halostatue
+          reviewers: |
+            halostatue
