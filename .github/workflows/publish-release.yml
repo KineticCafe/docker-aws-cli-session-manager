@@ -55,7 +55,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - id: meta
-        uses: docker/metadata-action@v5.4.0
+        uses: docker/metadata-action@v5.5.1
         with:
           images: |
             ${{ env.REPOSITORY }}
@@ -80,7 +80,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - uses: peter-evans/dockerhub-description@v3.4.2
+      - uses: peter-evans/dockerhub-description@v4.0.0
         with:
           repository: kineticcafe/aws-cli-session-manager
           username: ${{ secrets.DOCKERHUB_USERNAME }}
