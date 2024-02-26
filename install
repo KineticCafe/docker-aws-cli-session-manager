@@ -42,14 +42,6 @@ already a symlink to TARGET/${script} and --force is not supplied.
 USAGE
 }
 
-maybe-verbose() {
-  if "${verbose}"; then
-    set -x && "${@}" && set +x
-  else
-    "${@}"
-  fi
-}
-
 declare force install_symlinks no_download target target_script verbose
 force=false
 install_symlinks=true
@@ -68,13 +60,14 @@ while (($#)); do
     ;;
   *)
     if [[ ! -d "$1" ]]; then
-      echo >&2 "error: '$1' is not a directory"
+      printf >&2 "error: '%s' is not a directory\n\n" "$1"
       usage >&2
       exit 1
     fi
 
     if [[ -n "${target}" ]]; then
-      echo >&2 "warning: target '$target' is being replaced with '$1'"
+      printf >&2 "warning: target '%s' is being replaced with '%s'" \
+        "$target" "$1"
     fi
 
     target="$1"
@@ -84,28 +77,44 @@ while (($#)); do
   shift
 done
 
+if [[ -z "${target}" ]]; then
+  printf >&2 "error: no TARGET provided\n\n"
+  usage >&2
+  exit 1
+fi
+
 target_script="${target}/${script}"
 
 download-script() {
-  if ! curl -sSL "${url}" -o "${target_script}"; then
+  local -a cmd
+  cmd=(curl -sSL --fail "${url}" -o "${target_script}")
+
+  [[ "${verbose}" ]] && echo "${cmd[*]}"
+
+  if ! "${cmd[@]}"; then
     echo >&2 "error: could not download ${url} into ${target_script}."
     exit 1
   fi
 }
 
-if "${no_download}"; then
+if "${no_download}" && ! [[ -x "${target_script}" ]]; then
+  echo >&2 "error: ${target_script} does not exist and no download is set."
+  exit 1
+elif [[ -x "${target_script}" ]] && ! "${force}"; then
+  echo >&2 "error: ${target_script} already exists."
+  exit 1
+fi
+
+if ! [[ -x "${target_script}" ]] && ! "${no_download}"; then
+  download-script
+
   if ! [[ -x "${target_script}" ]]; then
-    echo >&2 "error: ${target_script} does not exist and no download is set."
+    if "${verbose}"; then
+      chmod -v +x "${target_script}"
+    else
+      chmod +x "${target_script}"
+    fi
   fi
-elif [[ -x "${target_script}" ]]; then
-  if ! "${force}"; then
-    echo >&2 "error: ${target_script} already exists."
-    exit 1
-  fi
-
-  maybe-verbose download-script
-
-  [[ -x "${target_script}" ]] || maybe-verbose chmod +x "${target_script}"
 fi
 
 "${install_symlinks}" || exit 0
@@ -123,5 +132,9 @@ for symlinked_command in "${symlinked_commands[@]}"; do
     fi
   fi
 
-  maybe-verbose ln -sf "${target_script}" "${target_command}"
+  if "${verbose}"; then
+    ln -sfv "${target_script}" "${target_command}"
+  else
+    ln -sf "${target_script}" "${target_command}"
+  fi
 done

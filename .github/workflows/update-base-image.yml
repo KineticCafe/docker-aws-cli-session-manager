@@ -6,13 +6,13 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_CLI_VERSION: '2.15.6'
+  AWS_CLI_VERSION: '2.15.23'
 
 jobs:
   check:
     runs-on: ubuntu-latest
     outputs:
-      needs-update: '{{ $steps.check.outputs.needs-updating }}'
+      needs-update: ${{ steps.check.outputs.needs-updating }}
     steps:
       - uses: lucacome/docker-image-update-checker@v1.2.1
         id: check
