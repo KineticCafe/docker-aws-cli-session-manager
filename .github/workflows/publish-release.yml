@@ -11,20 +11,6 @@ on:
         required: true
 
 jobs:
-  make-release:
-    runs-on: ubuntu-latest
-    name: Create Release
-    steps:
-      - uses: actions/checkout@v4
-        if: github.event_name == 'push'
-      - uses: actions/checkout@v4
-        if: github.event_name == 'workflow_dispatch'
-        with:
-          ref: refs/tags/${{ github.event.inputs.tag }}
-      - uses: ghalactic/github-release-from-tag@v5
-        with:
-          summaryEnabled: false
-
   publish-image:
     name: Build and Push to Docker Hub
     runs-on: ubuntu-latest
@@ -65,7 +51,7 @@ jobs:
             type=semver,pattern={{version}}
 
       - uses: docker/setup-qemu-action@v3.0.0
-      - uses: docker/setup-buildx-action@v3.0.0
+      - uses: docker/setup-buildx-action@v3.1.0
 
       - id: docker_build
         uses: docker/build-push-action@v5.1.0
@@ -74,15 +60,20 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
           platforms: |
             linux/amd64
             linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - uses: ghalactic/github-release-from-tag@v5
+        with:
+          summaryEnabled: false
+
       - uses: peter-evans/dockerhub-description@v4.0.0
         with:
-          repository: kineticcafe/aws-cli-session-manager
+          repository: kineticcafe/${{ env.REPOSITORY }}
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
