@@ -30,7 +30,7 @@ jobs:
       - uses: extractions/setup-just@v1
       - run: |
           just update-base-image
-      - uses: peter-evans/create-pull-request@v6.0.0
+      - uses: peter-evans/create-pull-request@v6.0.1
         with:
           commit-message: ${{ env.UPDATE_TITLE }}
 
