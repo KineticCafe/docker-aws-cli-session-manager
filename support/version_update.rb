@@ -37,10 +37,6 @@ today = Date.today.strftime("%Y-%m-%d")
 release_header = "#{new_version} / #{today}"
 history_body = "Automatic update to amazon/aws-cli:#{new_version}"
 
-update_file ".github/workflows/update-base-image.yml" do |file|
-  file.sub(/AWS_CLI_VERSION: ['"][.0-9]+['"]/, "AWS_CLI_VERSION: '#{new_version}'")
-end
-
 update_file "Dockerfile" do |file|
   file.sub(/AWS_CLI_VERSION=[.0-9]+/, "AWS_CLI_VERSION=#{new_version}")
 end
