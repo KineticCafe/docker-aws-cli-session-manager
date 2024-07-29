@@ -5,16 +5,18 @@ on:
     - cron: '0 13 * * 2' # 13:00 UTC every Tuesday
   workflow_dispatch:
 
-env:
-  AWS_CLI_VERSION: '2.15.23'
-
 jobs:
   check:
     runs-on: ubuntu-latest
     outputs:
-      needs-update: ${{ steps.check.outputs.needs-updating }}
+      needs-update: ${{ steps.check.outputs.needs-update }}
     steps:
-      - uses: lucacome/docker-image-update-checker@v1.2.1
+      - uses: actions/checkout@v4
+      - uses: extractions/setup-just@v2
+      - run: |
+          echo "AWS_CLI_VERSION=$(just current-version)" >>"$GITHUB_ENV"
+
+      - uses: KineticCafe/docker-image-update-checker@v1.0.0
         id: check
         with:
           base-image: amazon/aws-cli:${{ env.AWS_CLI_VERSION }}
@@ -22,6 +24,10 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
   pr:
+    permissions:
+      contents: write
+      pull-requests: write
+
     needs: check
     if: needs.check.outputs.needs-update == 'true'
     runs-on: ubuntu-latest
