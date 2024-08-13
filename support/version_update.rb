@@ -3,9 +3,9 @@ require "json"
 require "net/http"
 
 def update_file(name)
-  data = IO.read(name)
+  data = File.read(name)
   updated = yield data
-  IO.write(name, updated)
+  File.write(name, updated)
 end
 
 raise "missing current AWS_CLI_VERSION parameter" if ARGV.length == 0
