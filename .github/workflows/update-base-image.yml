@@ -44,6 +44,7 @@ jobs:
           branch: update-base-image/${{ env.UPDATE_VERSION }}
           title: ${{ env.UPDATE_TITLE }}
           body: ${{ env.UPDATE_BODY }}
+          draft: true
           labels: |
             automated
           assignees: |
