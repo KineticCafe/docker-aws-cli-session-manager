@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG AWS_CLI_VERSION=2.17.38
+ARG AWS_CLI_VERSION=2.17.42
 
 FROM amazon/aws-cli:${AWS_CLI_VERSION}
 
