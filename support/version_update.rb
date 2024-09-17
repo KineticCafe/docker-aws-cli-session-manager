@@ -67,7 +67,7 @@ end
 body = <<~EOF_GITHUB_ENV
   UPDATE_VERSION=#{new_version}
   UPDATE_TITLE=Update amazon/aws-cli base image #{release_header}
-  UPDATE_BODY=#{history_body}
+  UPDATE_BODY="\n#{history_body}"
 EOF_GITHUB_ENV
 
 puts body
