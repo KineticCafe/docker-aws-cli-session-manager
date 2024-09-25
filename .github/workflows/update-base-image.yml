@@ -3,6 +3,7 @@ name: Check for aws-cli update
 on:
   schedule:
     - cron: '0 13 * * 2' # 13:00 UTC every Tuesday
+
   workflow_dispatch:
 
 jobs:
@@ -32,22 +33,40 @@ jobs:
     if: needs.check.outputs.needs-update == 'true'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/create-github-app-token@v1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.KINETICCAFE_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.KINETICCAFE_BOT_PRIVATE_KEY }}
+
       - uses: actions/checkout@v4
+
       - uses: extractions/setup-just@v2
+
       - run: |
           just update-base-image
-      - uses: peter-evans/create-pull-request@v6.1.0
+
+      - uses: peter-evans/create-pull-request@v7.0.5
+        id: pr
         with:
-          commit-message: ${{ env.UPDATE_TITLE }}
+          token: ${{ steps.generate-token.outputs.token }}
+          sign-commits: true
+          commit-message: |
+            ${{ env.UPDATE_TITLE }}
 
             ${{ env.UPDATE_BODY }}
           branch: update-base-image/${{ env.UPDATE_VERSION }}
           title: ${{ env.UPDATE_TITLE }}
           body: ${{ env.UPDATE_BODY }}
-          draft: true
           labels: |
             automated
           assignees: |
             halostatue
           reviewers: |
             halostatue
+
+      - run: |
+          gh pr merge --rebase --auto ${{ steps.pr.outputs.pull-request-number }}
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+
