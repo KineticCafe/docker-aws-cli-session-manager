@@ -5,8 +5,8 @@ Manager plugin][] for AWS CLI. If Amazon starts including image versions with
 the session manager plugin included, this image will be discontinued.
 
 These images can be pulled either from Docker Hub
-(`kineticcafe/aws-cli-session-manager:2.22.0`) or GitHub Container Registry
-(`ghcr.io/kineticcafe/aws-cli-session-manager:2.22.0`).
+(`kineticcafe/aws-cli-session-manager:2.22.5`) or GitHub Container Registry
+(`ghcr.io/kineticcafe/aws-cli-session-manager:2.22.5`).
 
 ## `aws-cli-session-manager` script
 
@@ -15,12 +15,12 @@ The `aws-cli-session-manager` script is recommended to be installed in your
 had the native installation on your system, including the use of the AWS command
 completer.
 
-It will pull from `ghcr.io/kineticcafe/aws-cli-session-manager:2.22.0` by
+It will pull from `ghcr.io/kineticcafe/aws-cli-session-manager:2.22.5` by
 default. The version can be overridden by specifying `AWS_CLI_VERSION` and the
 image can be overridden entirely by specifying `IMAGE`:
 
 ```sh
-$ AWS_CLI_VERSION=2.22.0 ./aws-cli-session-manager --version
+$ AWS_CLI_VERSION=2.22.5 ./aws-cli-session-manager --version
 $ IMAGE=kineticcafe/aws-cli-session-manager:latest ./aws-cli-session-manager --version
 ```
 
