@@ -1,4 +1,4 @@
-AWS_CLI_VERSION := '2.22.18'
+AWS_CLI_VERSION := '2.22.23'
 
 # Build the image
 build:
