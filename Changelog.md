@@ -4,6 +4,10 @@ The versioning for this image tracks the same versioning as AWS CLI.
 
 <!-- automatic-release -->
 
+## 2.22.34 / 2025-01-14
+
+- Automatic update to amazon/aws-cli:2.22.34
+
 ## 2.22.29 / 2025-01-07
 
 - Automatic update to amazon/aws-cli:2.22.29
