@@ -17,7 +17,7 @@ jobs:
       - run: |
           echo "AWS_CLI_VERSION=$(just current-version)" >>"$GITHUB_ENV"
 
-      - uses: KineticCafe/docker-image-update-checker@v1.0.1
+      - uses: KineticCafe/docker-image-update-checker@v1.0.2
         id: check
         with:
           base-image: amazon/aws-cli:${{ env.AWS_CLI_VERSION }}
