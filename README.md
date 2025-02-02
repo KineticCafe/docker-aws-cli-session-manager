@@ -1,8 +1,27 @@
 # [ghcr.io/]kineticcafe/aws-cli-session-manager: AWS CLI v2 with Session Manager
 
-This is a minimal extension to [amazon/aws-cli][] that includes the [Session
-Manager plugin][] for AWS CLI. If Amazon starts including image versions with
-the session manager plugin included, this image will be discontinued.
+> [!IMPORTANT]
+>
+> This image will no longer receive updates and the repo is being archived as we
+> no longer use AWS CLI with Session Manager. I recommend forking this repo if
+> you wish to maintain a similar image for your organization as the architecture
+> and actions work very well.
+>
+> To make the automated version updates work in GitHub Actions, you will need to
+> create a GitHub app with the following permissions:
+>
+> - `repo:contents:write`
+> - `repo:metadata:read`
+> - `repo:pull-requests:write`
+> - `repo:workflows:write`
+> - `organizations:members:read`
+>
+> Kinetic Cafe open source team
+
+This is a minimal extension to [amazon/aws-cli][amazon/aws-cli] that includes
+the [Session Manager plugin][Session Manager plugin] for AWS CLI. If Amazon
+starts including image versions with the session manager plugin included, this
+image will be discontinued.
 
 These images can be pulled either from Docker Hub
 (`kineticcafe/aws-cli-session-manager:2.23.7`) or GitHub Container Registry
@@ -60,8 +79,9 @@ links to locations _other_ than `TARGET/aws-cli-session-manager`.
 
 `--no-symlinks` (`-S`) may be specified to skip symbolic link creation entirely.
 
-`--force` (`-f`) may be specified to install `kinetic-ansible` even if it already
-exists, and to overwrite files and non-`TARGET/kinetic-ansible` symbolic links.
+`--force` (`-f`) may be specified to install `kinetic-ansible` even if it
+already exists, and to overwrite files and non-`TARGET/kinetic-ansible` symbolic
+links.
 
 `--verbose` (`-v`) will turn on trace output of commands.
 
